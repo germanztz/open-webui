@@ -1,0 +1,19 @@
+[Unit]
+Description=Open WebUI Service
+After=network.target ollama.service
+
+[Service]
+WorkingDirectory=/home/daimler/workspaces/open-webui/
+ExecStart=/home/daimler/.local/bin/open-webui serve
+User=daimler
+Group=daimler
+Restart=always
+RestartSec=3
+# Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+# Environment="NODE_ENV=production"
+# Environment="OPENWEBUI_PORT=8080"  # Ajusta este valor según tu configuración
+# Environment="OPENWEBUI_ADDRESS=<tu_dirección_ip>"  # Ajusta con la dirección IP si es necesario
+# Environment="OPENWEBUI_API_URL=https://api.example.com"  # Ajusta con el URL de API si es necesario
+
+[Install]
+WantedBy=default.target

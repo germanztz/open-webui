@@ -1,0 +1,105 @@
+# ComfyUI Docker Compose File v1.0.1 by John Aldred
+# http://www.johnaldred.com
+# http://github.com/kaouthia
+
+services:
+  comfyui:
+    container_name: comfyui
+    image: comfyui:latest
+    ports:
+      - "8188:8188"
+    networks:
+      - ai-network
+    volumes:
+      - /home/ollama/confyui/models:/app/ComfyUI/models
+      - /home/ollama/confyui/output:/app/ComfyUI/output
+      - /home/ollama/confyui/settings:/app/ComfyUI/user/default:rw
+      - /home/ollama/confyui/flows:/app/ComfyUI/user/default/workflows:rw
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    restart: unless-stopped
+
+  tts-service:
+    container_name: tts-service
+    image: travisvn/openai-edge-tts:latest
+    ports:
+      - "5050:5050"
+    networks:
+      - ai-network
+    restart: unless-stopped
+    environment: 
+      # https://github.com/travisvn/openai-edge-tts/blob/main/README.md#installation
+      #   es-ES-AlvaroNeural es-ES-XimenaNeural es-ES-ElviraNeural ca-ES-JoanaNeural es-AR-ElenaNeural es-AR-TomasNeural es-US-AlonsoNeural es-US-PalomaNeural
+      - DEFAULT_VOICE=es-US-PalomaNeural
+      - API_KEY=your_api_key_here
+      - DEFAULT_RESPONSE_FORMAT=mp3
+      - DEFAULT_SPEED=1.0
+      - DEFAULT_LANGUAGE=es-ES
+      - REQUIRE_API_KEY=True
+      - REMOVE_FILTER=False
+      - EXPAND_API=True
+      - DETAILED_ERROR_LOGGING=True
+
+  open-webui:
+    container_name: open-webui
+    image: ghcr.io/open-webui/open-webui:dev
+    ports:
+      - "8080:8080"   # or whatever you want
+    networks:
+      - ai-network
+    extra_hosts:  
+      - "host.docker.internal:host-gateway"  # useful if referencing host
+    volumes:
+      - /home/ollama/openwebui_data/:/app/backend/data
+    restart: unless-stopped
+    environment: 
+      # https://docs.openwebui.com/getting-started/env-configuration/
+      - WEBUI_SECRET_KEY=cY1eWg2T2kF6MFtO
+      - USER_AGENT="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:144.0) Gecko/20100101 Firefox/144.0"
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - DEFAULT_MODELS=llama3.2:latest
+      - ENABLE_OPENAI_API=False
+      - OPENAI_API_BASE_URL=''
+      - OPENAI_API_KEY=''
+      - TASK_MODEL=llama3.2:latest
+      - ENABLE_EVALUATION_ARENA_MODELS=False
+      - ENABLE_MESSAGE_RATING=False
+      - ENABLE_COMMUNITY_SHARING=False
+      - ENABLE_VERSION_UPDATE_CHECK=False
+      - SCARF_NO_ANALYTICS=True
+      - DO_NOT_TRACK=True
+      - ANONYMIZED_TELEMETRY=False
+      - ENABLE_WEB_SEARCH=True
+      - WEB_SEARCH_ENGINE=duckduckgo
+
+      - RAG_EMBEDDING_ENGINE=ollama
+      - RAG_EMBEDDING_MODEL=qwen3-embedding
+
+      - WHISPER_MODEL=base
+      - WHISPER_LANGUAGE=es
+      - WHISPER_VAD_FILTER=True
+      - WHISPER_MODEL_AUTO_UPDATE=True
+
+      - AUDIO_TTS_ENGINE=openai
+      - AUDIO_TTS_OPENAI_API_BASE_URL=http://host.docker.internal:5050
+      - AUDIO_TTS_OPENAI_API_KEY=your_api_key_here
+      - AUDIO_TTS_API_KEY=your_api_key_here
+      - AUDIO_TTS_MODEL=tts-1
+      - AUDIO_TTS_VOICE=es-US-PalomaNeural
+      # punctuation, paragraphs
+      - AUDIO_TTS_SPLIT_ON=paragraphs
+
+      - ENABLE_IMAGE_GENERATION=True
+      - ENABLE_IMAGE_PROMPT_GENERATION=True
+      - IMAGE_GENERATION_ENGINE=comfyui
+      - IMAGE_GENERATION_MODEL=flux1-dev-fp8.safetensors
+      - IMAGE_SIZE=512x512
+      - IMAGE_STEPS=50
+      - COMFYUI_BASE_URL=http://host.docker.internal:8188
+      - COMFYUI_WORKFLOW={"3":{"inputs":{"seed":0,"steps":50,"cfg":8,"sampler_name":"euler","scheduler":"normal","denoise":1,"model":["4",0],"positive":["6",0],"negative":["7",0],"latent_image":["5",0]},"class_type":"KSampler","_meta":{"title":"KSampler"}},"4":{"inputs":{"ckpt_name":"flux1-dev-fp8.safetensors"},"class_type":"CheckpointLoaderSimple","_meta":{"title":"Load Checkpoint"}},"5":{"inputs":{"width":512,"height":512,"batch_size":1},"class_type":"EmptyLatentImage","_meta":{"title":"Empty Latent Image"}},"6":{"inputs":{"text":"A trafic sign of an Exclamation mark!","clip":["4",1]},"class_type":"CLIPTextEncode","_meta":{"title":"CLIP Text Encode (Prompt)"}},"7":{"inputs":{"text":"","clip":["4",1]},"class_type":"CLIPTextEncode","_meta":{"title":"CLIP Text Encode (Prompt)"}},"8":{"inputs":{"samples":["3",0],"vae":["4",2]},"class_type":"VAEDecode","_meta":{"title":"VAE Decode"}},"9":{"inputs":{"filename_prefix":"ComfyUI","images":["8",0]},"class_type":"SaveImage","_meta":{"title":"Save Image"}}}
+      # - COMFYUI_WORKFLOW_NODES="[{\"type\":\"prompt\",\"key\":\"text\",\"node_ids\":[\"6\"]},{\"type\":\"model\",\"key\":\"ckpt_name\",\"node_ids\":[\"4\"]},{\"type\":\"width\",\"key\":\"width\",\"node_ids\":[\"5\"]},{\"type\":\"height\",\"key\":\"height\",\"node_ids\":[\"5\"]},{\"type\":\"steps\",\"key\":\"steps\",\"node_ids\":[\"3\"]},{\"type\":\"seed\",\"key\":\"seed\",\"node_ids\":[\"3\"]}]"
+
+networks:
+  ai-network:
+    driver: bridge
