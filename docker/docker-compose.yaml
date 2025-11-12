@@ -71,7 +71,8 @@ services:
       - DO_NOT_TRACK=True
       - ANONYMIZED_TELEMETRY=False
       - ENABLE_WEB_SEARCH=True
-      - WEB_SEARCH_ENGINE=duckduckgo
+      - WEB_SEARCH_ENGINE=tavily
+      - TAVILY_API_KEY='https://app.tavily.com/home'
 
       - RAG_EMBEDDING_ENGINE=ollama
       - RAG_EMBEDDING_MODEL=qwen3-embedding
