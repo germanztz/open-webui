@@ -40,6 +40,7 @@ services:
       - REMOVE_FILTER=False
       - EXPAND_API=True
       - DETAILED_ERROR_LOGGING=True
+      - PORT=5050
 
   open-webui:
     container_name: open-webui
