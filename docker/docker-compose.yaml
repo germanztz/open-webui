@@ -22,7 +22,7 @@ services:
 
   tts-service:
     container_name: tts-service
-    image: travisvn/openai-edge-tts:latest
+    image: daimler/openai-edge-tts:latest
     ports:
       - "5050:5050"
     networks:
@@ -31,7 +31,7 @@ services:
     environment: 
       # https://github.com/travisvn/openai-edge-tts/blob/main/README.md#installation
       #   es-ES-AlvaroNeural es-ES-XimenaNeural es-ES-ElviraNeural ca-ES-JoanaNeural es-AR-ElenaNeural es-AR-TomasNeural es-US-AlonsoNeural es-US-PalomaNeural
-      - DEFAULT_VOICE=es-US-PalomaNeural
+      - DEFAULT_VOICE=es-ES-IsidoraMultilingualNeural
       - API_KEY=your_api_key_here
       - DEFAULT_RESPONSE_FORMAT=mp3
       - DEFAULT_SPEED=1.0
@@ -60,8 +60,8 @@ services:
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
       - DEFAULT_MODELS=llama3.2:latest
       - ENABLE_OPENAI_API=False
-      - OPENAI_API_BASE_URL=''
-      - OPENAI_API_KEY=''
+      # - OPENAI_API_BASE_URL=''
+      # - OPENAI_API_KEY=''
       - TASK_MODEL=llama3.2:latest
       - ENABLE_EVALUATION_ARENA_MODELS=False
       - ENABLE_MESSAGE_RATING=False
@@ -70,9 +70,10 @@ services:
       - SCARF_NO_ANALYTICS=True
       - DO_NOT_TRACK=True
       - ANONYMIZED_TELEMETRY=False
+
       - ENABLE_WEB_SEARCH=True
       - WEB_SEARCH_ENGINE=tavily
-      - TAVILY_API_KEY='https://app.tavily.com/home'
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
 
       - RAG_EMBEDDING_ENGINE=ollama
       - RAG_EMBEDDING_MODEL=qwen3-embedding
@@ -86,20 +87,30 @@ services:
       - AUDIO_TTS_OPENAI_API_BASE_URL=http://host.docker.internal:5050
       - AUDIO_TTS_OPENAI_API_KEY=your_api_key_here
       - AUDIO_TTS_API_KEY=your_api_key_here
-      - AUDIO_TTS_MODEL=tts-1
-      - AUDIO_TTS_VOICE=es-US-PalomaNeural
+      - AUDIO_TTS_MODEL=tts-1-hd
+      - AUDIO_TTS_VOICE=es-ES-IsidoraMultilingualNeural
       # punctuation, paragraphs
       - AUDIO_TTS_SPLIT_ON=paragraphs
 
       - ENABLE_IMAGE_GENERATION=True
       - ENABLE_IMAGE_PROMPT_GENERATION=True
       - IMAGE_GENERATION_ENGINE=comfyui
-      - IMAGE_GENERATION_MODEL=flux1-dev-fp8.safetensors
+      - IMAGE_GENERATION_MODEL=is-set-in-workflow
       - IMAGE_SIZE=512x512
       - IMAGE_STEPS=50
       - COMFYUI_BASE_URL=http://host.docker.internal:8188
-      - COMFYUI_WORKFLOW={"3":{"inputs":{"seed":0,"steps":50,"cfg":8,"sampler_name":"euler","scheduler":"normal","denoise":1,"model":["4",0],"positive":["6",0],"negative":["7",0],"latent_image":["5",0]},"class_type":"KSampler","_meta":{"title":"KSampler"}},"4":{"inputs":{"ckpt_name":"flux1-dev-fp8.safetensors"},"class_type":"CheckpointLoaderSimple","_meta":{"title":"Load Checkpoint"}},"5":{"inputs":{"width":512,"height":512,"batch_size":1},"class_type":"EmptyLatentImage","_meta":{"title":"Empty Latent Image"}},"6":{"inputs":{"text":"A trafic sign of an Exclamation mark!","clip":["4",1]},"class_type":"CLIPTextEncode","_meta":{"title":"CLIP Text Encode (Prompt)"}},"7":{"inputs":{"text":"","clip":["4",1]},"class_type":"CLIPTextEncode","_meta":{"title":"CLIP Text Encode (Prompt)"}},"8":{"inputs":{"samples":["3",0],"vae":["4",2]},"class_type":"VAEDecode","_meta":{"title":"VAE Decode"}},"9":{"inputs":{"filename_prefix":"ComfyUI","images":["8",0]},"class_type":"SaveImage","_meta":{"title":"Save Image"}}}
-      # - COMFYUI_WORKFLOW_NODES="[{\"type\":\"prompt\",\"key\":\"text\",\"node_ids\":[\"6\"]},{\"type\":\"model\",\"key\":\"ckpt_name\",\"node_ids\":[\"4\"]},{\"type\":\"width\",\"key\":\"width\",\"node_ids\":[\"5\"]},{\"type\":\"height\",\"key\":\"height\",\"node_ids\":[\"5\"]},{\"type\":\"steps\",\"key\":\"steps\",\"node_ids\":[\"3\"]},{\"type\":\"seed\",\"key\":\"seed\",\"node_ids\":[\"3\"]}]"
+      # - COMFYUI_API_KEY=""
+      - COMFYUI_WORKFLOW={"60":{"inputs":{"filename_prefix":"Qwen_t2i","images":["75:8",0]},"class_type":"SaveImage","_meta":{"title":"GuardarImagen"}},"75:58":{"inputs":{"width":1328,"height":1328,"batch_size":1},"class_type":"EmptySD3LatentImage","_meta":{"title":"EmptySD3LatentImage"}},"75:7":{"inputs":{"text":"","clip":["75:38",0]},"class_type":"CLIPTextEncode","_meta":{"title":"CLIPTextEncode(NegativePrompt)"}},"75:66":{"inputs":{"shift":3.1000000000000005,"model":["75:73",0]},"class_type":"ModelSamplingAuraFlow","_meta":{"title":"ModelSamplingAuraFlow"}},"75:8":{"inputs":{"samples":["75:3",0],"vae":["75:39",0]},"class_type":"VAEDecode","_meta":{"title":"DecodificaciónVAE"}},"75:37":{"inputs":{"unet_name":"qwen_image_fp8_e4m3fn.safetensors","weight_dtype":"default"},"class_type":"UNETLoader","_meta":{"title":"CargarModelodeDifusión"}},"75:6":{"inputs":{"text":"prompt","clip":["75:38",0]},"class_type":"CLIPTextEncode","_meta":{"title":"CLIPTextEncode(PositivePrompt)"}},"75:38":{"inputs":{"clip_name":"qwen_2.5_vl_7b_fp8_scaled.safetensors","type":"qwen_image","device":"default"},"class_type":"CLIPLoader","_meta":{"title":"CargarCLIP"}},"75:39":{"inputs":{"vae_name":"qwen_image_vae.safetensors"},"class_type":"VAELoader","_meta":{"title":"CargarVAE"}},"75:3":{"inputs":{"seed":1125488487853216,"steps":4,"cfg":1,"sampler_name":"euler","scheduler":"simple","denoise":1,"model":["75:66",0],"positive":["75:6",0],"negative":["75:7",0],"latent_image":["75:58",0]},"class_type":"KSampler","_meta":{"title":"KSampler"}},"75:73":{"inputs":{"lora_name":"Qwen-Image-Lightning-4steps-V1.0.safetensors","strength_model":1,"model":["75:37",0]},"class_type":"LoraLoaderModelOnly","_meta":{"title":"CargadorLoRAModeloSolo"}}}
+      # - COMFYUI_WORKFLOW_NODES="[[{\"type\":\"prompt\",\"key\":\"text\",\"node_ids\":[\"75:6\"]},{\"type\":\"model\",\"key\":\"ckpt_name\",\"node_ids\":[]},{\"type\":\"width\",\"key\":\"width\",\"node_ids\":[\"75:58\"]},{\"type\":\"height\",\"key\":\"height\",\"node_ids\":[\"75:58\"]},{\"type\":\"steps\",\"key\":\"steps\",\"node_ids\":[\"75:3\"]},{\"type\":\"seed\",\"key\":\"seed\",\"node_ids\":[\"75:3\"]}]"
+      - IMAGE_EDIT_ENGINE=comfyui
+      - IMAGE_EDIT_MODEL=is-set-in-workflow
+      - IMAGE_EDIT_SIZE=512x512
+      - IMAGES_EDIT_COMFYUI_BASE_URL=http://host.docker.internal:8188
+      # - IMAGES_EDIT_COMFYUI_API_KEY=""
+      - IMAGES_EDIT_COMFYUI_WORKFLOW={"60":{"inputs":{"filename_prefix":"ComfyUI","images":["115:8",0]},"class_type":"SaveImage","_meta":{"title":"Guardar Imagen"}},"78":{"inputs":{"image":"02_qwen_Image_edit_subgraphed_input_image.png"},"class_type":"LoadImage","_meta":{"title":"CargarImagen"}},"115:75":{"inputs":{"strength":1,"model":["115:66",0]},"class_type":"CFGNorm","_meta":{"title":"CFGNorm"}},"115:39":{"inputs":{"vae_name":"qwen_image_vae.safetensors"},"class_type":"VAELoader","_meta":{"title":"CargarVAE"}},"115:38":{"inputs":{"clip_name":"qwen_2.5_vl_7b_fp8_scaled.safetensors","type":"qwen_image","device":"default"},"class_type":"CLIPLoader","_meta":{"title":"CargarCLIP"}},"115:37":{"inputs":{"unet_name":"qwen_image_edit_2509_fp8_e4m3fn.safetensors","weight_dtype":"default"},"class_type":"UNETLoader","_meta":{"title":"CargarModelodeDifusión"}},"115:110":{"inputs":{"prompt":"","clip":["115:38",0],"vae":["115:39",0],"image1":["115:93",0]},"class_type":"TextEncodeQwenImageEditPlus","_meta":{"title":"TextEncodeQwenImageEditPlus"}},"115:66":{"inputs":{"shift":3,"model":["115:89",0]},"class_type":"ModelSamplingAuraFlow","_meta":{"title":"ModelSamplingAuraFlow"}},"115:111":{"inputs":{"prompt":"prompt","clip":["115:38",0],"vae":["115:39",0],"image1":["115:93",0]},"class_type":"TextEncodeQwenImageEditPlus","_meta":{"title":"TextEncodeQwenImageEditPlus"}},"115:112":{"inputs":{"width":2560,"height":1440,"batch_size":1},"class_type":"EmptySD3LatentImage","_meta":{"title":"EmptySD3LatentImage"}},"115:88":{"inputs":{"pixels":["115:93",0],"vae":["115:39",0]},"class_type":"VAEEncode","_meta":{"title":"VAECodificar"}},"115:93":{"inputs":{"upscale_method":"lanczos","megapixels":1,"image":["78",0]},"class_type":"ImageScaleToTotalPixels","_meta":{"title":"EscalarImagenaTotaldePixeles"}},"115:3":{"inputs":{"seed":1118877715456453,"steps":4,"cfg":1,"sampler_name":"euler","scheduler":"simple","denoise":1,"model":["115:75",0],"positive":["115:111",0],"negative":["115:110",0],"latent_image":["115:88",0]},"class_type":"KSampler","_meta":{"title":"KSampler"}},"115:8":{"inputs":{"samples":["115:3",0],"vae":["115:39",0]},"class_type":"VAEDecode","_meta":{"title":"DecodificaciónVAE"}},"115:116":{"inputs":{"images":["115:8",0]},"class_type":"PreviewImage","_meta":{"title":"Vistapreviadeimagen"}},"115:89":{"inputs":{"lora_name":"Qwen-Image-Edit-2509-Lightning-4steps-V1.0-bf16.safetensors","strength_model":1,"model":["115:37",0]},"class_type":"LoraLoaderModelOnly","_meta":{"title":"CargadorLoRAModeloSolo"}}}
+      # - IMAGES_EDIT_COMFYUI_WORKFLOW_NODES="[{\"type\":\"image\",\"key\":\"image\",\"node_ids\":[\"78\"]},{\"type\":\"prompt\",\"key\":\"prompt\",\"node_ids\":[\"115:111\"]},{\"type\":\"model\",\"key\":\"unet_name\",\"node_ids\":[]},{\"type\":\"width\",\"key\":\"width\",\"node_ids\":[\"115:112\"]},{\"type\":\"height\",\"key\":\"height\",\"node_ids\":[\"115:112\"]}]"
+      - AUTOMATIC1111_BASE_URL=http://host.docker.internal:8188
+      - AUTOMATIC1111_API_AUTH=your_api_key_here
 
 networks:
   ai-network:
