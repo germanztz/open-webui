@@ -91,7 +91,7 @@ spec:
           - name: IMAGE_STEPS
             value: "20"
           - name: COMFYUI_BASE_URL
-            value: "http://host.k3d.internal:8188"
+            value: "http://comfyui-svc:8188"
           - name: IMAGE_EDIT_ENGINE
             value: "comfyui"
           - name: IMAGE_EDIT_MODEL
@@ -99,9 +99,9 @@ spec:
           - name: IMAGE_EDIT_SIZE
             value: "512x512"
           - name: IMAGES_EDIT_COMFYUI_BASE_URL
-            value: "http://host.k3d.internal:8188"
+            value: "http://comfyui-svc:8188"
           - name: AUTOMATIC1111_BASE_URL
-            value: "http://host.k3d.internal:8188"
+            value: "http://comfyui-svc:8188"
           - name: AUTOMATIC1111_API_AUTH
             value: "your_api_key_here"
         volumeMounts:

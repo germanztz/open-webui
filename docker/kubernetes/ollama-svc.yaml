@@ -5,8 +5,9 @@ metadata:
 spec:
   selector:
     app: ollama
+  type: NodePort
   ports:
     - protocol: TCP
       port: 11434
       targetPort: 11434
-  type: NodePort
+      nodePort: 31434

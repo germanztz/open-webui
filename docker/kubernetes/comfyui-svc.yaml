@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: comfyui-svc
+spec:
+  selector:
+    app: comfyui
+  ports:
+    - protocol: TCP
+      port: 8188
+      targetPort: 8188
+      nodePort: 30188
+  type: NodePort

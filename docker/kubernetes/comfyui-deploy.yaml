@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comfyui-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comfyui
+  template:
+    metadata:
+      labels:
+        app: comfyui
+    spec:
+      containers:
+      - name: comfyui
+        image: localhost:32000/comfyui:latest
+        ports:
+        - containerPort: 8188
+        env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: "all"
+        volumeMounts:
+        - name: models-volume
+          mountPath: /app/ComfyUI/models
+        - name: output-volume
+          mountPath: /app/ComfyUI/output
+        - name: settings-volume
+          mountPath: /app/ComfyUI/user/default
+        - name: flows-volume
+          mountPath: /app/ComfyUI/user/default/workflows
+      volumes:
+      - name: models-volume
+        hostPath:
+          path: /home/ollama/confyui/models
+      - name: output-volume
+        hostPath:
+          path: /home/ollama/confyui/output
+      - name: settings-volume
+        hostPath:
+          path: /home/ollama/confyui/settings
+      - name: flows-volume
+        hostPath:
+          path: /home/ollama/confyui/flows
+      runtimeClassName: nvidia

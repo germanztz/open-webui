@@ -67,6 +67,7 @@ KUBEALIAS="kubectl='microk8s kubectl'"
 
 4_build_and_push_openwebui_image() {
     echo "Building and pushing openwebui image to MicroK8s registry..."
+    sed -i 's/--platform=\$BUILDPLATFORM //g' ../../Dockerfile
     (cd ../../ && docker build -t localhost:32000/daimler/openwebui:0.6.40 .)
     docker push localhost:32000/daimler/openwebui:0.6.40
     echo "openwebui image built and pushed successfully."
