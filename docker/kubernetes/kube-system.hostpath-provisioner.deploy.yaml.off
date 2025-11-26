@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: hostpath-provisioner
+  name: hostpath-provisioner
+  namespace: kube-system
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      k8s-app: hostpath-provisioner
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        k8s-app: hostpath-provisioner
+    spec:
+      containers:
+      - env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        - name: PV_DIR
+          value: /home/ollama/microk8s/common/default-storage
+        - name: BUSYBOX_IMAGE
+          value: busybox:1.28.4
+        image: cdkbot/hostpath-provisioner:1.5.0
+        imagePullPolicy: IfNotPresent
+        name: hostpath-provisioner
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /home/ollama/microk8s/common/default-storage
+          name: pv-volume
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: microk8s-hostpath
+      serviceAccountName: microk8s-hostpath
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - hostPath:
+          path: /home/ollama/microk8s/common/default-storage
+          type: ""
+        name: pv-volume

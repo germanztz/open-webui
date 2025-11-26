@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tts-ing
+spec:
+  ingressClassName: public
+  rules:
+  - host: tts.127.0.0.1.nip.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: tts-svc
+            port:
+              number: 8080

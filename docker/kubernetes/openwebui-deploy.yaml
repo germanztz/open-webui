@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openwebui-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openwebui
+  template:
+    metadata:
+      labels:
+        app: openwebui
+    spec:
+      containers:
+      - name: openwebui
+        image: localhost:32000/daimler/openwebui:latest
+        ports:
+        - containerPort: 8080
+        env:
+          - name: WEBUI_SECRET_KEY
+            value: "cY1eWg2T2kF6MFtO"
+          - name: USER_AGENT
+            value: "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:144.0) Gecko/20100101 Firefox/144.0"
+          - name: OLLAMA_BASE_URL
+            value: "http://ollama-svc:11434"
+          - name: DEFAULT_MODELS
+            value: "llama3.2:latest"
+          - name: ENABLE_OPENAI_API
+            value: "False"
+          - name: TASK_MODEL
+            value: "qwen2.5:7b-instruct"
+          - name: TASK_MODEL_EXTERNAL
+            value: "qwen2.5:7b-instruct"
+          - name: ENABLE_EVALUATION_ARENA_MODELS
+            value: "False"
+          - name: ENABLE_MESSAGE_RATING
+            value: "False"
+          - name: ENABLE_COMMUNITY_SHARING
+            value: "False"
+          - name: ENABLE_VERSION_UPDATE_CHECK
+            value: "False"
+          - name: SCARF_NO_ANALYTICS
+            value: "True"
+          - name: DO_NOT_TRACK
+            value: "True"
+          - name: ANONYMIZED_TELEMETRY
+            value: "False"
+          - name: ENABLE_WEB_SEARCH
+            value: "True"
+          - name: WEB_SEARCH_ENGINE
+            value: "tavily"
+          - name: TAVILY_API_KEY
+            value: "your_api_key_here"
+          - name: RAG_EMBEDDING_ENGINE
+            value: "ollama"
+          - name: RAG_EMBEDDING_MODEL
+            value: "qwen3-embedding"
+          - name: WHISPER_MODEL
+            value: "base"
+          - name: WHISPER_LANGUAGE
+            value: "es"
+          - name: WHISPER_VAD_FILTER
+            value: "True"
+          - name: WHISPER_MODEL_AUTO_UPDATE
+            value: "True"
+          - name: AUDIO_TTS_ENGINE
+            value: "openai"
+          - name: AUDIO_TTS_OPENAI_API_BASE_URL
+            value: "http://tts-svc:5050"
+          - name: AUDIO_TTS_OPENAI_API_KEY
+            value: "your_api_key_here"
+          - name: AUDIO_TTS_API_KEY
+            value: "your_api_key_here"
+          - name: AUDIO_TTS_MODEL
+            value: "tts-1-hd"
+          - name: AUDIO_TTS_VOICE
+            value: "es-ES-IsidoraMultilingualNeural"
+          - name: AUDIO_TTS_SPLIT_ON
+            value: "paragraphs"
+          - name: ENABLE_IMAGE_GENERATION
+            value: "True"
+          - name: ENABLE_IMAGE_PROMPT_GENERATION
+            value: "True"
+          - name: IMAGE_GENERATION_ENGINE
+            value: "comfyui"
+          - name: IMAGE_GENERATION_MODEL
+            value: "is-set-in-workflow"
+          - name: IMAGE_SIZE
+            value: "512x512"
+          - name: IMAGE_STEPS
+            value: "20"
+          - name: COMFYUI_BASE_URL
+            value: "http://host.k3d.internal:8188"
+          - name: IMAGE_EDIT_ENGINE
+            value: "comfyui"
+          - name: IMAGE_EDIT_MODEL
+            value: "is-set-in-workflow"
+          - name: IMAGE_EDIT_SIZE
+            value: "512x512"
+          - name: IMAGES_EDIT_COMFYUI_BASE_URL
+            value: "http://host.k3d.internal:8188"
+          - name: AUTOMATIC1111_BASE_URL
+            value: "http://host.k3d.internal:8188"
+          - name: AUTOMATIC1111_API_AUTH
+            value: "your_api_key_here"
+        volumeMounts:
+        - name: openwebui-data
+          mountPath: "/app/backend/data"
+      volumes:
+      - name: openwebui-data
+        hostPath:
+          path: "/home/ollama/openwebui_data/"
+          type: DirectoryOrCreate

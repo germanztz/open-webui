@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tts-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tts
+  template:
+    metadata:
+      labels:
+        app: tts
+    spec:
+      containers:
+      - name: tts
+        image: localhost:32000/daimler/openai-edge-tts:latest
+        ports:
+        - containerPort: 5050
+        env:
+          - name: DEFAULT_VOICE
+            value: es-ES-IsidoraMultilingualNeural
+          - name: API_KEY
+            value: your_api_key_here
+          - name: DEFAULT_RESPONSE_FORMAT
+            value: mp3
+          - name: DEFAULT_SPEED
+            value: "1.0"
+          - name: DEFAULT_LANGUAGE
+            value: es-ES
+          - name: REQUIRE_API_KEY
+            value: "True"
+          - name: REMOVE_FILTER
+            value: "False"
+          - name: EXPAND_API
+            value: "True"
+          - name: DETAILED_ERROR_LOGGING
+            value: "True"
+          - name: PORT
+            value: "5050"

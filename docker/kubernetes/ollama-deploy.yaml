@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      runtimeClassName: nvidia
+      containers:
+      - name: ollama
+        image: ollama/ollama:latest
+        ports:
+        - containerPort: 11434
+        resources:
+          limits:
+            nvidia.com/gpu: 1  
+        env:
+        # - name: OLLAMA_GPU
+        #   value: "true"
+        # - name: OLLAMA_NUM_GPU
+        #   value: "1"
+        volumeMounts:
+        - name: ollama-models
+          mountPath: /root/.ollama/models
+      volumes:
+      - name: ollama-models
+        hostPath:
+          path: /home/ollama/models
+          type: DirectoryOrCreate
