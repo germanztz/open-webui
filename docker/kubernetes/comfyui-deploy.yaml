@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: comfyui-deploy
+  name: comfyui
 spec:
   replicas: 1
   selector:

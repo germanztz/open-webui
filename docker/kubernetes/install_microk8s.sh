@@ -61,8 +61,9 @@ KUBEALIAS="kubectl='microk8s kubectl'"
     (cd ../openai-edge-tts && docker build -t localhost:32000/daimler/openai-edge-tts:1.0.0 .)
     docker push localhost:32000/daimler/openai-edge-tts:1.0.0
     echo "TTS image built and pushed successfully."
-    kubectl scale deployment tts-deploy -n $1 --replicas=0
-    kubectl scale deployment tts-deploy -n $1 --replicas=1
+    # kubectl scale deployment tts -n $1 --replicas=0
+    # kubectl scale deployment tts -n $1 --replicas=1
+    # kubectl rollout restart deployment tts -n $1
 }
 
 4_build_and_push_openwebui_image() {
@@ -71,8 +72,9 @@ KUBEALIAS="kubectl='microk8s kubectl'"
     (cd ../../ && docker build -t localhost:32000/daimler/openwebui:0.6.40 .)
     docker push localhost:32000/daimler/openwebui:0.6.40
     echo "openwebui image built and pushed successfully."
-    # kubectl scale deployment openwebui-deploy -n $1 --replicas=0
-    # kubectl scale deployment openwebui-deploy -n $1 --replicas=1
+    # kubectl scale deployment openwebui -n $1 --replicas=0
+    # kubectl scale deployment openwebui -n $1 --replicas=1
+    # kubectl rollout restart deployment openwebui -n $1
 }
 
 5_apply_yaml() {
