@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: openwebui
-        image: localhost:32000/daimler/openwebui:latest
+        image: localhost:32000/daimler/openwebui:0.6.40
         ports:
         - containerPort: 8080
         env:

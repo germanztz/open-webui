@@ -23,9 +23,23 @@ KUBEALIAS="kubectl='microk8s kubectl'"
         sudo microk8s enable ingress
         sudo microk8s enable registry
         sudo microk8s enable nvidia
-        
         # sudo microk8s enable dashboard
         # sudo microk8s enable dashboard-ingress
+
+        sudo microk8s kubectl patch deployment registry -n container-registry --type=json \
+            -p='[{
+                "op": "replace",
+                "path": "/spec/template/spec/volumes/0",
+                "value": {
+                "name": "registry-data",
+                "hostPath": {
+                    "path": "/home/ollama/microk8s/registry-data/",
+                    "type": "DirectoryOrCreate"
+                }
+                }
+            }]'
+        # sudo microk8s kubectl apply -f registry.deploy.yaml 
+        sudo microk8s kubectl delete pvc registry-claim -n container-registry
     fi
 
     microk8s kubectl get pods --all-namespaces
@@ -44,20 +58,20 @@ KUBEALIAS="kubectl='microk8s kubectl'"
 
 3_build_and_push_tts_image() {
     echo "Building and pushing TTS image to MicroK8s registry..."
-    (cd ../openai-edge-tts && docker build -t localhost:32000/daimler/openai-edge-tts:latest .)
-    docker push localhost:32000/daimler/openai-edge-tts:latest
+    (cd ../openai-edge-tts && docker build -t localhost:32000/daimler/openai-edge-tts:1.0.0 .)
+    docker push localhost:32000/daimler/openai-edge-tts:1.0.0
     echo "TTS image built and pushed successfully."
     kubectl scale deployment tts-deploy -n $1 --replicas=0
     kubectl scale deployment tts-deploy -n $1 --replicas=1
 }
 
 4_build_and_push_openwebui_image() {
-    echo "Building and pushing TTS image to MicroK8s registry..."
-    (cd ../../ && docker build -t localhost:32000/daimler/openwebui:latest .)
-    docker push localhost:32000/daimler/openwebui:latest
-    echo "TTS image built and pushed successfully."
-    # kubectl scale deployment tts-deploy -n $1 --replicas=0
-    # kubectl scale deployment tts-deploy -n $1 --replicas=1
+    echo "Building and pushing openwebui image to MicroK8s registry..."
+    (cd ../../ && docker build -t localhost:32000/daimler/openwebui:0.6.40 .)
+    docker push localhost:32000/daimler/openwebui:0.6.40
+    echo "openwebui image built and pushed successfully."
+    # kubectl scale deployment openwebui-deploy -n $1 --replicas=0
+    # kubectl scale deployment openwebui-deploy -n $1 --replicas=1
 }
 
 5_apply_yaml() {
