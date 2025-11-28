@@ -14,12 +14,15 @@ spec:
     spec:
       containers:
       - name: comfyui
-        image: localhost:32000/comfyui:latest
+        image: localhost:32000/daimler/comfyui:0.2.75
         ports:
         - containerPort: 8188
         env:
         - name: NVIDIA_VISIBLE_DEVICES
           value: "all"
+        resources:
+          limits:
+            memory: 20Gi
         volumeMounts:
         - name: models-volume
           mountPath: /app/ComfyUI/models

@@ -14,4 +14,4 @@ spec:
           service:
             name: tts-svc
             port:
-              number: 8080
+              number: 5050

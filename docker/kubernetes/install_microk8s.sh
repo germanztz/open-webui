@@ -1,7 +1,7 @@
 #!/bin/bash
 
-NAMESPACE=openwebui
-KUBEALIAS="kubectl='microk8s kubectl'"
+NAMESPACE=ia
+alias kclean="kubectl get pods -n ia | grep -v 'Running' | awk '{print $1}' | xargs microk8s kubectl delete pod -n ia"
 
 1_install_microk8s() {
 
@@ -14,7 +14,7 @@ KUBEALIAS="kubectl='microk8s kubectl'"
         chmod 0700 ~/.kube
 
         alias kubectl='microk8s kubectl'
-        grep -q "$KUBEALIAS" ~/.bash_aliases || echo "$KUBEALIAS" >> ~/.bash_aliases
+        grep -q "kubectl" ~/.bash_aliases || echo "alias kubectl='microk8s kubectl'" >> ~/.bash_aliases
 
         sudo microk8s status --wait-ready
         sudo microk8s enable hostpath-storage
@@ -71,6 +71,14 @@ KUBEALIAS="kubectl='microk8s kubectl'"
     docker push localhost:32000/daimler/openwebui:0.6.40
     echo "openwebui image built and pushed successfully."
     kubectl rollout restart deploy openwebui -n $1
+}
+
+4_build_and_push_comfyui_image() {
+    echo "Building and pushing comfyui image to MicroK8s registry..."
+    (cd ../ComfyUI-Docker && docker build . -t localhost:32000/daimler/comfyui:0.3.75)
+    docker push localhost:32000/daimler/comfyui:0.3.75
+    echo "TTS image built and pushed successfully."
+    kubectl rollout restart deploy comfyui -n $1
 }
 
 5_apply_yaml() {
