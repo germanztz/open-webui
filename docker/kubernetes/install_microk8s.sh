@@ -1,7 +1,10 @@
 #!/bin/bash
 
 NAMESPACE=ia
-alias kclean="kubectl get pods -n ia | grep -v 'Running' | awk '{print $1}' | xargs microk8s kubectl delete pod -n ia"
+# alias kubectl='microk8s kubectl'
+# alias k='microk8s kubectl'
+# alias klogs='multitail -ci green --label "comfyui: " -L "microk8s kubectl logs -f deployment.apps/comfyui"  -ci blue --label "tts: " -L "microk8s kubectl logs -f deployment.apps/tts"  -ci yellow --label "openwebui: " -L "microk8s kubectl logs -f deployment.apps/openwebui"  -ci red  --label "ollama: "  -L "microk8s kubectl logs -f deployment.apps/ollama"'
+# alias kpurge='microk8s kubectl get pods --no-headers | grep -v "Running" | cut -f1 -d\  | xargs -r microk8s kubectl delete pod'
 
 1_install_microk8s() {
 
