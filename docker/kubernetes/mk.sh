@@ -1,10 +1,13 @@
 #!/bin/bash
 
 NAMESPACE=ia
-# alias kubectl='microk8s kubectl'
-# alias k='microk8s kubectl'
-# alias klogs='multitail -ci green --label "comfyui: " -L "microk8s kubectl logs -f deployment.apps/comfyui"  -ci blue --label "tts: " -L "microk8s kubectl logs -f deployment.apps/tts"  -ci yellow --label "openwebui: " -L "microk8s kubectl logs -f deployment.apps/openwebui"  -ci red  --label "ollama: "  -L "microk8s kubectl logs -f deployment.apps/ollama"'
-# alias kpurge='microk8s kubectl get pods --no-headers | grep -v "Running" | cut -f1 -d\  | xargs -r microk8s kubectl delete pod'
+read -r -d '' aliases <<'EOF'
+alias kubectl='microk8s kubectl'
+alias k='microk8s kubectl'
+alias klogs='multitail -ci green --label "comfyui: " -L "microk8s kubectl logs -f deployment.apps/comfyui" -ci blue --label "tts: " -L "microk8s kubectl logs -f deployment.apps/tts" -ci yellow --label "openwebui: " -L "microk8s kubectl logs -f deployment.apps/openwebui" -ci red --label "ollama: " -L "microk8s kubectl logs -f deployment.apps/ollama"'
+alias kpurge='microk8s kubectl get pods --no-headers -n ia | grep -v "Running" | awk "{print \$1}" | xargs -r microk8s kubectl delete pod'
+EOF
+
 
 1_install_microk8s() {
 
@@ -16,8 +19,7 @@ NAMESPACE=ia
         mkdir -p ~/.kube
         chmod 0700 ~/.kube
 
-        alias kubectl='microk8s kubectl'
-        grep -q "kubectl" ~/.bash_aliases || echo "alias kubectl='microk8s kubectl'" >> ~/.bash_aliases
+        grep -q "kubectl" ~/.bash_aliases || echo "$aliases" >> ~/.bash_aliases
 
         sudo microk8s status --wait-ready
         sudo microk8s enable hostpath-storage
@@ -60,20 +62,26 @@ NAMESPACE=ia
 }
 
 3_build_and_push_tts_image() {
+    IMAGE_VERSION="$1" 
     echo "Building and pushing TTS image to MicroK8s registry..."
-    (cd ../openai-edge-tts && docker build -t localhost:32000/daimler/openai-edge-tts:1.0.0 .)
-    docker push localhost:32000/daimler/openai-edge-tts:1.0.0
+    (cd ../openai-edge-tts && docker build -t localhost:32000/daimler/openai-edge-tts:$IMAGE_VERSION .)
+    docker push localhost:32000/daimler/openai-edge-tts:$IMAGE_VERSION
+    # microk8s ctr images tag localhost:32000/daimler/openai-edge-tts:$IMAGE_VERSION localhost:32000/daimler/openai-edge-tts:latest
+    (microk8s ctr images list; docker images) | grep openai-edge-tts
     echo "TTS image built and pushed successfully."
-    kubectl rollout restart deploy tts -n $1
+    echo "Update tts-deploy.yaml image to $IMAGE_VERSION and run k apply -f tts-deploy.yaml "
 }
 
 4_build_and_push_openwebui_image() {
+    IMAGE_VERSION="$1" 
     echo "Building and pushing openwebui image to MicroK8s registry..."
     sed -i 's/--platform=\$BUILDPLATFORM //g' ../../Dockerfile
-    (cd ../../ && docker build -t localhost:32000/daimler/openwebui:0.6.40 .)
-    docker push localhost:32000/daimler/openwebui:0.6.40
+    (cd ../../ && docker build -t localhost:32000/daimler/openwebui:$IMAGE_VERSION .)
+    docker push localhost:32000/daimler/openwebui:$IMAGE_VERSION
+    # microk8s ctr images tag localhost:32000/daimler/openwebui:$IMAGE_VERSION localhost:32000/daimler/openwebui:latest
+    (microk8s ctr images list; docker images) | grep openwebui
     echo "openwebui image built and pushed successfully."
-    kubectl rollout restart deploy openwebui -n $1
+    echo "Update openwebui-deploy.yaml image to $IMAGE_VERSION and run k apply -f openwebui-deploy.yaml "
 }
 
 4_build_and_push_comfyui_image() {
@@ -90,8 +98,27 @@ NAMESPACE=ia
 }
 
 delete_image(){
-    microk8s ctr image rm $1
+    microk8s ctr image rm --sync $1
+    docker image rm --force $1
     microk8s ctr image list | grep localhost
 }
 
-1_install_microk8s
+purge_pods() {
+    microk8s kubectl get pods --no-headers | grep -v "Running" | cut -f1 -d\  | xargs -r microk8s kubectl delete pod
+    echo "Purging completed."
+    microk8s kubectl get pods
+}
+
+
+# Main execution logic
+if [ $# -eq 0 ]; then
+    echo "Examples"
+    echo "$0 1_install_microk8s"
+    echo "$0 4_build_and_push_openwebui_image 0.6.43"
+    echo " "
+    purge_pods
+else
+    func_name=$1
+    shift
+    "$func_name" "$@"
+fi

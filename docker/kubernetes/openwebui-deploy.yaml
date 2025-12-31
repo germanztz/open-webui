@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: openwebui
-        image: localhost:32000/daimler/openwebui:0.6.40
+        image: localhost:32000/daimler/openwebui:0.6.43
         ports:
         - containerPort: 8080
         env:
@@ -76,7 +76,7 @@ spec:
           - name: AUDIO_TTS_MODEL
             value: "tts-1-hd"
           - name: AUDIO_TTS_VOICE
-            value: "es-ES-IsidoraMultilingualNeural"
+            value: "en-US-AvaMultilingualNeural"
           - name: AUDIO_TTS_SPLIT_ON
             value: "paragraphs"
           - name: ENABLE_IMAGE_GENERATION
