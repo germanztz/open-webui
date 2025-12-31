@@ -86,4 +86,9 @@ alias kclean="kubectl get pods -n ia | grep -v 'Running' | awk '{print $1}' | xa
     kubectl apply -f . -n=$1
 }
 
+delete_image(){
+    microk8s ctr image rm $1
+    microk8s ctr image list | grep localhost
+}
+
 1_install_microk8s

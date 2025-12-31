@@ -11,6 +11,7 @@ spec:
     metadata:
       labels:
         app: tts
+        app_group: ia
     spec:
       containers:
       - name: tts

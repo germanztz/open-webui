@@ -11,10 +11,11 @@ spec:
     metadata:
       labels:
         app: comfyui
+        app_group: ia
     spec:
       containers:
       - name: comfyui
-        image: localhost:32000/daimler/comfyui:0.2.75
+        image: localhost:32000/daimler/comfyui:0.3.75
         ports:
         - containerPort: 8188
         env:
@@ -22,7 +23,7 @@ spec:
           value: "all"
         resources:
           limits:
-            memory: 20Gi
+            memory: 22Gi
         volumeMounts:
         - name: models-volume
           mountPath: /app/ComfyUI/models

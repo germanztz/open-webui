@@ -11,6 +11,7 @@ spec:
     metadata:
       labels:
         app: openwebui
+        app_group: ia
     spec:
       containers:
       - name: openwebui
