@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatterbox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chatterbox
+  template:
+    metadata:
+      labels:
+        app: chatterbox
+        app_group: ia
+    spec:
+      runtimeClassName: nvidia
+      containers:
+      - name: chatterbox
+        image: localhost:32000/daimler/chatterbox-tts:latest
+        ports:
+        - containerPort: 4123
+        env:
+          - name: PORT
+            value: "4123"
+          - name: HOST
+            value: "0.0.0.0"
+          # TTS Model Settings
+          - name: EXAGGERATION
+            value: "0.5"
+          - name: CFG_WEIGHT
+            value: "0.5"
+          - name: TEMPERATURE
+            value: "0.8"
+          # Text Processing
+          - name: MAX_CHUNK_LENGTH
+            value: "280"
+          - name: MAX_TOTAL_LENGTH
+            value: "3000"
+          # Long Text TTS Settings
+          - name: LONG_TEXT_DATA_DIR
+            value: "/data/long_text_jobs"
+          - name: LONG_TEXT_MAX_LENGTH
+            value: "100000"
+          - name: LONG_TEXT_CHUNK_SIZE
+            value: "2500"
+          - name: LONG_TEXT_SILENCE_PADDING_MS
+            value: "200"
+          - name: LONG_TEXT_JOB_RETENTION_DAYS
+            value: "7"
+          - name: LONG_TEXT_MAX_CONCURRENT_JOBS
+            value: "3"
+          # Voice and Model Settings
+          - name: VOICE_SAMPLE_PATH
+            value: "/app/voice-samples/voice-sample.mp3"
+          - name: DEVICE
+            value: "cuda"
+          - name: MODEL_CACHE_DIR
+            value: "/cache"
+          - name: VOICE_LIBRARY_DIR
+            value: "/voices"
+          # NVIDIA/CUDA settings
+          - name: NVIDIA_VISIBLE_DEVICES
+            value: "all"
+          - name: NVIDIA_DRIVER_CAPABILITIES
+            value: "compute,utility"
+        # resources:
+        #   limits:
+        #     nvidia.com/gpu: 1  
+        volumeMounts:
+        - name: chatterbox-voice-samples
+          mountPath: /app/voice-samples
+        - name: chatterbox-voices
+          mountPath: /voices
+        - name: chatterbox-cache
+          mountPath: /cache
+        - name: chatterbox-data
+          mountPath: /data
+      volumes:
+      - name: chatterbox-voice-samples
+        hostPath:
+          path: /home/ollama/chatterbox/samples/
+          type: DirectoryOrCreate
+      - name: chatterbox-voices
+        hostPath:
+          path: /home/ollama/chatterbox/voices/
+          type: DirectoryOrCreate
+      - name: chatterbox-cache
+        hostPath:
+          path: /home/ollama/chatterbox/cache/
+          type: DirectoryOrCreate
+      - name: chatterbox-data
+        hostPath:
+          path: /home/ollama/chatterbox/data/
+          type: DirectoryOrCreate

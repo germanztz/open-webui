@@ -18,10 +18,10 @@ spec:
         image: ollama/ollama:latest
         ports:
         - containerPort: 11434
-        resources:
-          limits:
-            nvidia.com/gpu: 1  
-        env:
+        # resources:
+        #   limits:
+        #     nvidia.com/gpu: 1  
+        # env:
         # - name: OLLAMA_GPU
         #   value: "true"
         # - name: OLLAMA_NUM_GPU

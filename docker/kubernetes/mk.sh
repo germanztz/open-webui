@@ -69,7 +69,7 @@ EOF
     # microk8s ctr images tag localhost:32000/daimler/openai-edge-tts:$IMAGE_VERSION localhost:32000/daimler/openai-edge-tts:latest
     (microk8s ctr images list; docker images) | grep openai-edge-tts
     echo "TTS image built and pushed successfully."
-    echo "Update tts-deploy.yaml image to $IMAGE_VERSION and run k apply -f tts-deploy.yaml "
+    echo "Update tts-deploy.yaml image to $IMAGE_VERSION and run 'k apply -f tts-deploy.yaml' "
 }
 
 4_build_and_push_openwebui_image() {
@@ -81,7 +81,7 @@ EOF
     # microk8s ctr images tag localhost:32000/daimler/openwebui:$IMAGE_VERSION localhost:32000/daimler/openwebui:latest
     (microk8s ctr images list; docker images) | grep openwebui
     echo "openwebui image built and pushed successfully."
-    echo "Update openwebui-deploy.yaml image to $IMAGE_VERSION and run k apply -f openwebui-deploy.yaml "
+    echo "Update openwebui-deploy.yaml image to $IMAGE_VERSION and run 'k apply -f openwebui-deploy.yaml' "
 }
 
 4_build_and_push_comfyui_image() {
