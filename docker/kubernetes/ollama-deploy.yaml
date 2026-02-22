@@ -21,16 +21,37 @@ spec:
         # resources:
         #   limits:
         #     nvidia.com/gpu: 1  
-        # env:
-        # - name: OLLAMA_GPU
-        #   value: "true"
-        # - name: OLLAMA_NUM_GPU
-        #   value: "1"
+        env:
+        - name: OLLAMA_GPU
+          value: "true"
+        - name: OLLAMA_NUM_GPU
+          value: "1"
+        # - name: OLLAMA_API_KEY
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: ollama-secret
+        #       key: api-key      
         volumeMounts:
         - name: ollama-models
           mountPath: /root/.ollama/models
+        - name: ollama-ssh-private
+          mountPath: /root/.ollama/id_ed25519
+          readOnly: true
+        - name: ollama-ssh-public
+          mountPath: /root/.ollama/id_ed25519.pub
+          readOnly: true
       volumes:
       - name: ollama-models
         hostPath:
           path: /home/ollama/models
           type: DirectoryOrCreate
+      - name: ollama-ssh-private
+        hostPath:
+          path: /home/ollama/ssh/id_ed25519
+          type: File
+      - name: ollama-ssh-public
+        hostPath:
+          path: /home/ollama/ssh/id_ed25519.pub
+          type: File
+
+# kubectl create secret generic ollama-secret --from-literal=api-key="your-api-key"
