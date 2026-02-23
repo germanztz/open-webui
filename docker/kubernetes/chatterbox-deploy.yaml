@@ -92,3 +92,7 @@ spec:
         hostPath:
           path: /home/ollama/chatterbox/data/
           type: DirectoryOrCreate
+
+# k scale deploy/chatterbox --replicas=0
+# curl -X POST http://localhost:30123/v1/audio/speech -H "Content-Type: application/json" -d '{"input": "hello world!!"}' --output speech.wav | ffplay -nodisp -autoexit -i - 
+# curl -X POST http://localhost:30123/v1/audio/speech -H "Content-Type: application/json" -d '{"input": "hello world!!"}' | ffplay -nodisp -autoexit -i - 

@@ -11,3 +11,7 @@ spec:
       port: 4123
       targetPort: 4123
       nodePort: 30123
+
+# k scale deploy/chatterbox --replicas=0
+# curl -X POST http://localhost:30123/v1/audio/speech -H "Content-Type: application/json" -d '{"input": "hello world!!"}' --output speech.wav | ffplay -nodisp -autoexit -i - 
+# curl -X POST http://localhost:30123/v1/audio/speech -H "Content-Type: application/json" -d '{"input": "hello world!!"}' | ffplay -nodisp -autoexit -i - 

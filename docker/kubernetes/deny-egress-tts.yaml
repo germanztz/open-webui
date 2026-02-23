@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: denegar-acceso-internet
+  namespace: ia
+spec:
+  podSelector:
+    matchLabels:
+      app: chatterbox
+  policyTypes:
+  - Egress
+  egress: []  # Una lista vacía significa "denegar todo el tráfico saliente"
+
+# k apply -f deny-egress-tts.yaml 
+# k get networkpolicy
+# k delete networkpolicy denegar-acceso-internet
+
+# k get pod -o wide
+# ip route get <ip>
+# sudo tcpdump -i <interface>

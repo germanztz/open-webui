@@ -4,8 +4,10 @@ NAMESPACE=ia
 read -r -d '' aliases <<'EOF'
 alias kubectl='microk8s kubectl'
 alias k='microk8s kubectl'
-alias klogs='multitail -ci green --label "comfyui: " -L "microk8s kubectl logs -f deployment.apps/comfyui" -ci blue --label "tts: " -L "microk8s kubectl logs -f deployment.apps/tts" -ci yellow --label "openwebui: " -L "microk8s kubectl logs -f deployment.apps/openwebui" -ci red --label "ollama: " -L "microk8s kubectl logs -f deployment.apps/ollama"'
-alias kpurge='microk8s kubectl get pods --no-headers -n ia | grep -v "Running" | awk "{print \$1}" | xargs -r microk8s kubectl delete pod'
+alias klogs='multitail -ci green --label "comfyui: " -L "microk8s kubectl logs -f deployment.apps/comfyui"  -ci blue --label "tts: " -L "microk8s kubectl logs -f deployment.apps/tts"  -ci yellow --label "openwebui: " -L "microk8s kubectl logs -f deployment.apps/openwebui"  -ci red  --label "ollama: "  -L "microk8s kubectl logs -f deployment.apps/ollama"'
+alias kpurge='microk8s kubectl get pods --no-headers | grep -v "Running" | cut -f1 -d\  | xargs -r microk8s kubectl delete pod'
+alias ollama='microk8s kubectl exec deploy/ollama -- ollama'
+alias ollamaps='watch microk8s kubectl exec deploy/ollama -- ollama ps'
 EOF
 
 
@@ -61,8 +63,7 @@ EOF
     echo "Registry configured and Docker daemon restarted."
 }
 
-3_build_and_push_tts_image() {
-    IMAGE_VERSION="$1" 
+3_build_and_push_tts_image() { IMAGE_VERSION="$1" 
     echo "Building and pushing TTS image to MicroK8s registry..."
     (cd ../openai-edge-tts && docker build -t localhost:32000/daimler/openai-edge-tts:$IMAGE_VERSION .)
     docker push localhost:32000/daimler/openai-edge-tts:$IMAGE_VERSION
@@ -72,8 +73,7 @@ EOF
     echo "Update tts-deploy.yaml image to $IMAGE_VERSION and run 'k apply -f tts-deploy.yaml' "
 }
 
-4_build_and_push_openwebui_image() {
-    IMAGE_VERSION="$1" 
+4_build_and_push_openwebui_image() { IMAGE_VERSION="$1" 
     echo "Building and pushing openwebui image to MicroK8s registry..."
     sed -i 's/--platform=\$BUILDPLATFORM //g' ../../Dockerfile
     (cd ../../ && docker build -t localhost:32000/daimler/openwebui:$IMAGE_VERSION .)
@@ -84,22 +84,22 @@ EOF
     echo "Update openwebui-deploy.yaml image to $IMAGE_VERSION and run 'k apply -f openwebui-deploy.yaml' "
 }
 
-4_build_and_push_comfyui_image() {
+4_build_and_push_comfyui_image() { 
     echo "Building and pushing comfyui image to MicroK8s registry..."
     (cd ../ComfyUI-Docker && docker build . -t localhost:32000/daimler/comfyui:0.3.75)
     docker push localhost:32000/daimler/comfyui:0.3.75
     echo "TTS image built and pushed successfully."
-    kubectl rollout restart deploy comfyui -n $1
+    kubectl rollout restart deploy comfyui 
 }
 
-5_apply_yaml() {
-    kubectl create ns $1
-    kubectl apply -f . -n=$1
+5_apply_yaml() { NAMESPACE="$1"
+    kubectl create ns $NAMESPACE
+    kubectl apply -f . -n=$NAMESPACE
 }
 
-delete_image(){
-    microk8s ctr image rm --sync $1
-    docker image rm --force $1
+delete_image(){ IMAGE_NAME="$1"
+    microk8s ctr image rm --sync $IMAGE_NAME
+    docker image rm --force $IMAGE_NAME
     microk8s ctr image list | grep localhost
 }
 

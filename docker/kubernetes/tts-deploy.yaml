@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
       - name: tts
-        image: localhost:32000/daimler/openai-edge-tts:1.0.1
+        # image: localhost:32000/daimler/openai-edge-tts:1.0.1
+        image: travisvn/openai-edge-tts:latest
         ports:
         - containerPort: 5050
         env:
