@@ -108,8 +108,14 @@ spec:
         volumeMounts:
         - name: openwebui-data
           mountPath: "/app/backend/data"
+        - name: host-home
+          mountPath: /home          
       volumes:
       - name: openwebui-data
         hostPath:
           path: "/home/ollama/openwebui_data/"
           type: DirectoryOrCreate
+      - name: host-home
+        hostPath:
+          path: /home
+          type: Directory          
