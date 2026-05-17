@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: langflow
+  template:
+    metadata:
+      labels:
+        app: langflow
+    spec:
+      containers:
+      - name: langflow
+        image: langflowai/langflow:latest
+        ports:
+        - containerPort: 7860
+        env: # https://docs.langflow.org/environment-variables
+        - name: LANGFLOW_PORT
+          value: "7860"
+        - name: LANGFLOW_HOST
+          value: "0.0.0.0"
+      #   volumeMounts:
+      #   - name: langflow-data
+      #     mountPath: /app/data
+      # volumes:
+      # - name: langflow-data
+      #   persistentVolumeClaim:
+      #     claimName: langflow-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: langflow-svc
+spec:
+  selector:
+    app: langflow
+  ports:
+  - port: 7860
+    targetPort: 7860
+  type: LoadBalancer
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: langflow-ing
+spec:
+  ingressClassName: public
+  rules:
+  - host: langflow.127.0.0.1.nip.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: langflow-svc
+            port:
+              number: 7860
