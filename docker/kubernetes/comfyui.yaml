@@ -17,6 +17,7 @@ spec:
       containers:
       - name: comfyui
         image: localhost:32000/daimler/comfyui:0.3.75
+        # jamesbrink/comfyui
         ports:
         - containerPort: 8188
         env:
@@ -47,3 +48,35 @@ spec:
       - name: flows-volume
         hostPath:
           path: /home/ollama/confyui/flows
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comfyui-svc
+spec:
+  selector:
+    app: comfyui
+  ports:
+    - protocol: TCP
+      port: 8188
+      targetPort: 8188
+      nodePort: 30188
+  type: NodePort
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: comfyui-ing
+spec:
+  ingressClassName: public
+  rules:
+  - host: comfyui.127.0.0.1.nip.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: comfyui-svc
+            port:
+              number: 8188

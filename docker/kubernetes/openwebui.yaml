@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
       - name: openwebui
-        image: localhost:32000/daimler/openwebui:0.9.4
-        # image: openwebui/open-webui:latest-slim
+        # image: localhost:32000/daimler/openwebui:0.9.4
+        image: openwebui/open-webui:latest-slim
         ports:
         - containerPort: 8080
         env:
@@ -120,3 +120,48 @@ spec:
         hostPath:
           path: /home
           type: Directory          
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: openwebui-svc
+spec:
+  selector:
+    app: openwebui
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080
+  type: NodePort
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openwebui-ing
+spec:
+  ingressClassName: public
+  rules:
+  - host: openwebui.127.0.0.1.nip.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: openwebui-svc
+            port:
+              number: 8080
+  - host: openwebui.omen.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: openwebui-svc
+            port:
+              number: 8080              

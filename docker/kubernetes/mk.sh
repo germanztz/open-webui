@@ -24,12 +24,7 @@ EOF
         grep -q "kubectl" ~/.bash_aliases || echo "$aliases" >> ~/.bash_aliases
 
         sudo microk8s status --wait-ready
-        sudo microk8s enable hostpath-storage
-        sudo microk8s enable dns
-        sudo microk8s enable community
-        sudo microk8s enable ingress
-        sudo microk8s enable registry
-        sudo microk8s enable nvidia
+        sudo microk8s enable hostpath-storage dns community ingress registry nvidia
         # sudo microk8s enable dashboard
         # sudo microk8s enable dashboard-ingress
 
@@ -47,6 +42,29 @@ EOF
             }]'
         # sudo microk8s kubectl apply -f registry.deploy.yaml 
         sudo microk8s kubectl delete pvc registry-claim -n container-registry
+
+        # sudo nano /var/snap/microk8s/current/certs/csr.conf.template
+        # borra las líneas de IP.3, IP.4, etc., que apuntaban a tu Wi-Fi
+        # sudo nano /var/snap/microk8s/current/args/kubelet
+        # --node-ip=127.0.0.1
+        # sudo nano /var/snap/microk8s/current/args/kube-apiserver
+        # --advertise-address=127.0.0.1
+        # 1. Detener el servicio
+        # sudo snap stop microk8s
+
+        # 2. Regenerar TODOS los certificados con la nueva plantilla (sin IPs de Wi-Fi)
+        # sudo microk8s refresh-certs
+
+        # 3. Iniciar el servicio
+        # sudo snap start microk8s
+
+        # 4. Esperar a que esté listo
+        # microk8s status --wait-ready
+        # Generar el config
+        # microk8s config > ~/.kube/config
+
+        # Forzar que el servidor sea localhost
+        # sed -i 's/server: https:\/\/.*:16443/server: https:\/\/127.0.0.1:16443/g' ~/.kube/config
     fi
 
     microk8s kubectl get pods --all-namespaces

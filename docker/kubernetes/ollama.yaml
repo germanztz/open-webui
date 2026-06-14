@@ -61,3 +61,17 @@ spec:
           type: Directory
 
 # kubectl create secret generic ollama-secret --from-literal=api-key="your-api-key"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama-svc
+spec:
+  selector:
+    app: ollama
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 11434
+      targetPort: 11434
+      nodePort: 31434
