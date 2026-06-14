@@ -21,6 +21,9 @@ spec:
         # resources:
         #   limits:
         #     nvidia.com/gpu: 1  
+        resources:
+          limits:
+            memory: 22Gi
         env:
         - name: OLLAMA_GPU
           value: "true"

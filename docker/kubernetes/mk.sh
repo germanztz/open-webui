@@ -43,28 +43,6 @@ EOF
         # sudo microk8s kubectl apply -f registry.deploy.yaml 
         sudo microk8s kubectl delete pvc registry-claim -n container-registry
 
-        # sudo nano /var/snap/microk8s/current/certs/csr.conf.template
-        # borra las líneas de IP.3, IP.4, etc., que apuntaban a tu Wi-Fi
-        # sudo nano /var/snap/microk8s/current/args/kubelet
-        # --node-ip=127.0.0.1
-        # sudo nano /var/snap/microk8s/current/args/kube-apiserver
-        # --advertise-address=127.0.0.1
-        # 1. Detener el servicio
-        # sudo snap stop microk8s
-
-        # 2. Regenerar TODOS los certificados con la nueva plantilla (sin IPs de Wi-Fi)
-        # sudo microk8s refresh-certs
-
-        # 3. Iniciar el servicio
-        # sudo snap start microk8s
-
-        # 4. Esperar a que esté listo
-        # microk8s status --wait-ready
-        # Generar el config
-        # microk8s config > ~/.kube/config
-
-        # Forzar que el servidor sea localhost
-        # sed -i 's/server: https:\/\/.*:16443/server: https:\/\/127.0.0.1:16443/g' ~/.kube/config
     fi
 
     microk8s kubectl get pods --all-namespaces
@@ -72,6 +50,31 @@ EOF
     # echo -e "\n\nhttps://kubernetes-dashboard.127.0.0.1.nip.io\n\n"
     echo "MicroK8s enabled."
 
+}
+
+11_config_microk8s() {
+    # sudo nano /var/snap/microk8s/current/certs/csr.conf.template
+    # borra las líneas de IP.3, IP.4, etc., que apuntaban a tu Wi-Fi
+    # sudo nano /var/snap/microk8s/current/args/kubelet
+    # --node-ip=127.0.0.1
+    # sudo nano /var/snap/microk8s/current/args/kube-apiserver
+    # --advertise-address=127.0.0.1
+    # 1. Detener el servicio
+    # sudo snap stop microk8s
+
+    # 2. Regenerar TODOS los certificados con la nueva plantilla (sin IPs de Wi-Fi)
+    # sudo microk8s refresh-certs
+
+    # 3. Iniciar el servicio
+    # sudo snap start microk8s
+
+    # 4. Esperar a que esté listo
+    # microk8s status --wait-ready
+    # Generar el config
+    # microk8s config > ~/.kube/config
+
+    # Forzar que el servidor sea localhost
+    # sed -i 's/server: https:\/\/.*:16443/server: https:\/\/127.0.0.1:16443/g' ~/.kube/config    
 }
 
 2_configure_docker_registry() {
