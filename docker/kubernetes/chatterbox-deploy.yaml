@@ -17,6 +17,7 @@ spec:
       containers:
       - name: chatterbox
         image: localhost:32000/daimler/chatterbox-tts:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 4123
         env:
