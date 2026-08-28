@@ -22,7 +22,7 @@ services:
 
   tts-service:
     container_name: tts-service
-    image: daimler/openai-edge-tts:latest
+    image: travisvn/openai-edge-tts:latest
     ports:
       - "5050:5050"
     networks:
@@ -44,7 +44,7 @@ services:
 
   open-webui:
     container_name: open-webui
-    image: ghcr.io/open-webui/open-webui:dev
+    image: openwebui/open-webui:latest-slim
     ports:
       - "8080:8080"   # or whatever you want
     networks:
