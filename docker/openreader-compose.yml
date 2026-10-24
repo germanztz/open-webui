@@ -1,0 +1,107 @@
+name: openreader-slim
+
+services:
+  openreader:
+    image: ghcr.io/richardr1126/openreader:latest
+    depends_on:
+      kokoro-tts:
+        condition: service_started
+      piper-tts:
+        condition: service_started
+    environment:
+      BASE_URL: ${BASE_URL:-http://localhost:3003}
+      AUTH_SECRET: ${AUTH_SECRET:-local-openreader-auth-secret-change-me}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      USE_ANONYMOUS_AUTH_SESSIONS: ${USE_ANONYMOUS_AUTH_SESSIONS:-false}
+      COMPUTE_WORKER_HOST: 0.0.0.0
+      COMPUTE_WORKER_PUBLIC_URL: ${COMPUTE_WORKER_PUBLIC_URL:-http://localhost:8081}
+      TTS_PLAYBACK_TOKEN_SECRET: ${TTS_PLAYBACK_TOKEN_SECRET:-local-tts-playback-token-secret}
+      RUNTIME_SEED_JSON: |-
+        {
+          "version": 1,
+          "runtimeConfig": {
+            "defaultTtsProvider": "piper"
+          },
+          "providers": [
+            {
+              "slug": "piper",
+              "displayName": "Piper",
+              "providerType": "custom-openai",
+              "baseUrl": "http://piper-tts:5000/v1",
+              "defaultModel": "ca_ES-upc_ona-medium",
+              "enabled": true
+            },
+            {
+              "slug": "kokoro",
+              "displayName": "Kokoro",
+              "providerType": "custom-openai",
+              "baseUrl": "http://kokoro-tts:8880/v1",
+              "defaultModel": "kokoro",
+              "enabled": true
+            }
+          ]
+        }
+    ports:
+      - "3003:3003"
+      - "8333:8333"
+      - "8081:8081"
+    volumes:
+      - openreader-docstore:/app/docstore
+
+  kokoro-tts:
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:v0.2.4
+    environment:
+      ONNX_NUM_THREADS: 8
+      ONNX_INTER_OP_THREADS: 4
+      ONNX_EXECUTION_MODE: parallel
+      ONNX_OPTIMIZATION_LEVEL: all
+      ONNX_MEMORY_PATTERN: "true"
+      ONNX_ARENA_EXTEND_STRATEGY: kNextPowerOfTwo
+      API_LOG_LEVEL: DEBUG
+    ports:
+      - "8880:8880"
+
+  # Preload every Spanish and Catalan voice so OpenReader's voice list exposes
+  # them before the first synthesis request (the server only lists installed
+  # voices). The first run downloads roughly 620 MB; later runs reuse the volume.
+  piper-tts-init:
+    image: kamilkrawiec/piper-openai-tts:latest
+    command:
+      - python
+      - -c
+      - |
+        import requests
+        import server
+
+        server.HF_URL_BASE = "https://huggingface.co/rhasspy/piper-voices/resolve/main"
+        catalog = requests.get(f"{server.HF_URL_BASE}/voices.json", timeout=60).json()
+        voices = [
+            key for key, entry in catalog.items()
+            if entry.get("language", {}).get("code", "").startswith(("es", "ca"))
+        ]
+        print(f"Preloading {len(voices)} Spanish/Catalan voices: {voices}")
+        failed = [voice for voice in voices if not server.download_voice_if_missing(voice)]
+        if failed:
+            print(f"Failed to download: {failed}")
+        raise SystemExit(0 if not failed else 1)
+    volumes:
+      - piper-tts-data:/data
+    restart: "no"
+
+  piper-tts:
+    image: kamilkrawiec/piper-openai-tts:latest
+    depends_on:
+      piper-tts-init:
+        condition: service_completed_successfully
+    environment:
+      DATA_DIR: /data
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    volumes:
+      - piper-tts-data:/data
+
+volumes:
+  openreader-docstore:
+  piper-tts-data:
